@@ -87,7 +87,7 @@ foreach ( $anFiles as $anFile ) {
  ***************************************************************/
 function an_enqueue_an_sripts() {
 	if ( ! is_admin() ) {
-		if ( an_check_views() ) {
+		if ( an_check_views() || an_check_is_excluded() ) {
 			return;
 		}
 		$anVersion = AN_VERSION;

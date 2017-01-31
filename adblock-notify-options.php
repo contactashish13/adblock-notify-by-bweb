@@ -59,7 +59,7 @@ function an_create_options() {
 	 * Create tab's options
 	 */
 	// Adblock Notify Options
-	do_action( 'an_pro_add_tab_options_top', $generalTab, $modalTab, $redirectTab, $alternativeTab );
+	do_action( 'an_pro_add_tab_options_top', $generalTab, $modalTab, $redirectTab, $alternativeTab, $advancedSettings );
 
 	$generalTab->createOption( array(
 		'name' => '',
@@ -434,7 +434,7 @@ function an_create_options() {
 		'lang' => 'css',
 	) );
 
-	do_action( 'an_pro_add_tab_options', $generalTab, $modalTab, $redirectTab, $alternativeTab );
+	do_action( 'an_pro_add_tab_options', $generalTab, $modalTab, $redirectTab, $alternativeTab, $advancedSettings );
 
 	/**
 	*************************************************************
@@ -497,7 +497,7 @@ function an_add_free_template( $array ) {
  * ************************************************************
  * Add additional features in the tabs but as the first items
  ***************************************************************/
-function an_pro_add_tab_options_top( $generalTab, $modalTab, $redirectTab, $alternativeTab ) {
+function an_pro_add_tab_options_top( $generalTab, $modalTab, $redirectTab, $alternativeTab, $advancedSettings ) {
 	$templates  = apply_filters( 'an_get_all_templates', array() );
 	$an_option = unserialize( an_get_option( 'adblocker_notify_options' ) );
 	$selected_template  = isset( $an_option['an_option_modal_template'] ) ? $an_option['an_option_modal_template'] : 'an-default';
@@ -526,7 +526,7 @@ function an_pro_add_tab_options_top( $generalTab, $modalTab, $redirectTab, $alte
  * ************************************************************
  * Add additional features in the tabs but as the last items
  ***************************************************************/
-function an_pro_add_tab_options( $generalTab, $modalTab, $redirectTab, $alternativeTab ) {
+function an_pro_add_tab_options( $generalTab, $modalTab, $redirectTab, $alternativeTab, $advancedSettings ) {
 	$modalTab->createOption( array(
 		'name' => __( 'Advanced Options', 'an-translate' ),
 		'type' => 'heading',
@@ -558,7 +558,61 @@ function an_pro_add_tab_options( $generalTab, $modalTab, $redirectTab, $alternat
 		'desc' => __( 'Prevent user from dismissing modal ', 'an-translate' ),
 		'default' => false,
 	) );
+
+	$advancedSettings->createOption( array(
+		'name' => __( 'Exclusions', 'an-translate' ),
+		'type' => 'heading',
+	) );
+
+	$an_option  = TitanFramework::getInstance( 'adblocker_notify' );
+	$exclusions = apply_filters( 'an_pro_exclusions', array() );
+	$types      = an_get_exclusions();
+	$query_type = $an_option->getOption( 'an_option_exclusion_type' );
+
+	if ( ! $exclusions ) {
+		$exclusions  = array( '' => array() );
+	}
+
+	ob_start();
+	include_once AN_PATH . 'inc/field-type-custom.php';
+	$custom     = ob_get_clean();
+
+	$advancedSettings->createOption( array(
+		'name' => __( 'Exclude', 'an-translate' ),
+		'type' => 'custom',
+		'custom' => $custom,
+	) );
+	$advancedSettings->createOption( array(
+		'name' => __( 'And', 'an-translate' ),
+		'id' => 'an_option_exclusion_type',
+		'type' => 'checkbox',
+		'desc' => __( 'And or or', 'an-translate' ),
+		'default' => true,
+	) );
 }
 
-add_action( 'an_pro_add_tab_options_top',  'an_pro_add_tab_options_top' , 10, 4 );
-add_action( 'an_pro_add_tab_options',   'an_pro_add_tab_options' , 10, 4 );
+/**
+ * ************************************************************
+ * Defines the exclusion types that are supported
+ ***************************************************************/
+function an_get_exclusions() {
+	$types     = array();
+
+	$types['post_type']   = array(
+		'name'          => __( 'Post Type', 'an-translate' ),
+	);
+
+	$types['post_status']   = array(
+		'name'          => __( 'Post Status', 'an-translate' ),
+	);
+
+	$types['category']   = array(
+		'name'          => __( 'Category', 'an-translate' ),
+	);
+
+	return $types;
+}
+
+
+add_action( 'an_pro_add_tab_options_top',  'an_pro_add_tab_options_top' , 10, 5 );
+add_action( 'an_pro_add_tab_options',   'an_pro_add_tab_options' , 10, 5 );

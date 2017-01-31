@@ -13,7 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Insert elements in the DOM : HTML & SCRIPT
  ***************************************************************/
 function an_prepare() {
-	if ( an_check_views() ) { return;
+	if ( an_check_views() || an_check_is_excluded() ) {
+		return;
 	}
 	$an_option = TitanFramework::getInstance( 'adblocker_notify' );
 	$output    = '';
@@ -795,4 +796,16 @@ function an_check_views() {
 	}
 
 	return false;
+}
+
+/**
+ * Return true if the current page has been excluded from checking for adblocks
+ *
+ * @return bool Is the page excluded
+ */
+function an_check_is_excluded() {
+	if ( ! an_is_pro() ) { return false;
+	}
+
+	return apply_filters( 'an_pro_exclude_pages', false );
 }
